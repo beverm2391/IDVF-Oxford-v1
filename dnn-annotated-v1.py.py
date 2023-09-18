@@ -27,7 +27,7 @@ parser.add_argument('--index',type = int,default = 8, help="model index for ense
 parser.add_argument('--freq',type = str,default = 'daily', help="horizon for computing vol")
 parser.add_argument('--count_one_day',type = int,default = 1, help="number of bins in one day")
 parser.add_argument('--cuda',type = int,default = 0, help="if GPU")
-parser.add_argument('--market',type=int,default = 1, help="if including market vol")
+parser.add_argument('--market',type=int,default = 1, help="if including market vol") # should you inclde market vol
 args=parser.parse_args()
 args.back_day = list(range(args.back_day))
 
@@ -46,7 +46,7 @@ device = torch.device("cuda:"+str(args.cuda))
 if args.freq == '10min':
     data = pd.read_csv('hf_data_stock_10min.csv', index_col = 0)
     args.back_day = 39*20
-    args.window_length = 39*250
+    args.window_length = 39*250 
     args.train_size = 39*1000
     args.count_one_day = 39
 elif args.freq == '30min':
@@ -72,7 +72,7 @@ args.back_day = list(range(args.back_day))
 
 # clean the data 
 data = data.fillna(method='ffill')
-namelist = data.columns[:93]
+namelist = data.columns[:93] # 93 stocks
 namelist = [x[:-4] for x in namelist]
 
 if args.freq!='daily':
@@ -322,7 +322,7 @@ class rolling_predict():
             start_index = np.where(self.a.idx == '2015-06-30'+'/'+'16:00')[0][0]
         else:
             start_index = np.where(self.a.idx == '2015-06-30')[0][0]
-        for start in range(start_index,T-1, window_length):
+        for start in range(start_index,T-1, window_length): 
             print(self.a.idx[start])
             if start + window_length <= T - 1: # if the testing period is not the last testing period
                 # append the predictions and targets to the result list
@@ -338,8 +338,8 @@ class rolling_predict():
 
 if __name__ == '__main__':
     q = rolling_predict(back_day=args.back_day,
-                        lr=0.001)
-    result = q.run(args.window_length, args.train_size, Epoch_num=200, pre=False)
+                        lr=0.001) # initialize the model
+    result = q.run(args.window_length, args.train_size, Epoch_num=200, pre=False) # 200 epochs
     MYDIR = 'hf_' + args.freq + '/dnn'
     CHECK_FOLDER = os.path.isdir(MYDIR)
     if not CHECK_FOLDER:
