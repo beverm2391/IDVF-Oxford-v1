@@ -248,23 +248,28 @@ class rolling_predict():
         if names is None:
             names = self.keywords
 
+        # ! Notice the shuffle is True here
+        # training dataloader
         trainloader = DataLoader(TensorDataset(torch.tensor(train_x), torch.tensor(train_y)),1024,
                                  shuffle=True) # initialize the training dataloader, batch size is 1024
-        # ! Notice the shuffle is True here
+        
+        # ! but the shuffle is False here
+        # val dataloader
         validloader1 = DataLoader(TensorDataset(torch.tensor(valid_x), torch.tensor(valid_y)),
                                   torch.tensor(valid_x).shape[0],
                                   shuffle=False) # initialize the validation dataloader, batch size is the number of validation samples
-        # ! but the shuffle is False here
+        
+        # ! and also False here
+        # test dataloader
         validloader2 = DataLoader(
             TensorDataset(torch.tensor(test_x), torch.tensor(test_y)),
             len(torch.tensor(test_y)), shuffle=False) # initialize the testing dataloader, batch size is the number of testing samples
-        # ! and also False here
 
-        early_stopping = EarlyStopping(patience=10, verbose=False, path=model_name)
+        early_stopping = EarlyStopping(patience=10, verbose=False, path=model_name) # set the early stopping criteria
         net = DNN(train_x.shape[1], 1).to(device) # initialize the model, input dims is the number of features, output dims is 1
         loss_function = nn.MSELoss() # loss function is MSE
         optimiser = optim.Adam(net.parameters(), lr=lr, eps=1e-8) # optimizer is Adam
-        Epoch_num = Epoch_num
+        Epoch_num = Epoch_num # not sure why this is here
 
         for epoch in range(Epoch_num):
             net.train() # set the model to train mode
@@ -276,37 +281,38 @@ class rolling_predict():
                 optimiser.step() # update the weights
             net.eval() # set the model to eval mode
             for data_val, target in validloader1:
-                output = net(data_val.float().to(device))
-                loss_valid = loss_function(output.float().view(-1), target.float().view(-1).to(device))
+                output = net(data_val.float().to(device)) # forward pass
+                loss_valid = loss_function(output.float().view(-1), target.float().view(-1).to(device)) # compute the validation loss
 
             # valid_list.append(loss_valid.float().view(-1).detach().cpu().numpy()[0])
             # test_list.append(loss_test.float().view(-1).detach().cpu().numpy()[0])
-            early_stopping(loss_valid.detach().cpu().numpy().reshape(-1)[0], net)
+            early_stopping(loss_valid.detach().cpu().numpy().reshape(-1)[0], net) # check if the validation loss is decreasing
             # if output.max() - output.min() < 0.2 and target.max() - target.min() > 1:
             #      early_stopping = EarlyStopping(patience=2000, verbose=False, path=model_name)
 
-            if early_stopping.early_stop:
+            if early_stopping.early_stop: # if the validation loss is not decreasing, stop training
                 break
-        net.load_state_dict(torch.load(model_name))
+
+        net.load_state_dict(torch.load(model_name)) 
         print(epoch)
         torch.save(net.state_dict(), join(save_path, 'Best_Model' +'_' + str(predict_index[0][:10])))
 
-        net.eval()
-        for data_val, target in validloader2:
+        net.eval() # set the model to eval mode
+        for data_val, target in validloader2: # test set
 
-            output = net(data_val.float().to(device))
+            output = net(data_val.float().to(device)) # forward pass
 
-        predict = output.float().view(-1).detach().cpu().numpy()
-        predict = y_stats.back(predict)
+        predict = output.float().view(-1).detach().cpu().numpy() # get the predictions
+        predict = y_stats.back(predict) # denormalize the predictions, get the real predictions
 
-        predict = np.reshape(predict, (-1, len(namelist)), 'F')
-        test_y = np.reshape(test_y, (-1, len(namelist)), 'F')
-        plot_valid = np.concatenate((predict, test_y), axis=1)
-        plot_valid = pd.DataFrame(plot_valid)
+        predict = np.reshape(predict, (-1, len(namelist)), 'F') # reshape the predictions
+        test_y = np.reshape(test_y, (-1, len(namelist)), 'F') # reshape the targets
+        plot_valid = np.concatenate((predict, test_y), axis=1) # concatenate the predictions and targets
+        plot_valid = pd.DataFrame(plot_valid) # convert to dataframe
         plot_valid.index = date[(np.where(date == predict_index[0])[0][0] + 1):(
-                np.where(date == predict_index[-1])[0][0] + 2)]
-        plot_valid.columns = [x + 'out' for x in namelist] + [x + 'real' for x in namelist]
-        return plot_valid
+                np.where(date == predict_index[-1])[0][0] + 2)] # set the index
+        plot_valid.columns = [x + 'out' for x in namelist] + [x + 'real' for x in namelist] # set the column names
+        return plot_valid # return the predictions and targets
 
 
     def run(self, window_length, train_size, Epoch_num = 2, pre = True):
@@ -318,15 +324,16 @@ class rolling_predict():
             start_index = np.where(self.a.idx == '2015-06-30')[0][0]
         for start in range(start_index,T-1, window_length):
             print(self.a.idx[start])
-            if start + window_length <= T - 1:
+            if start + window_length <= T - 1: # if the testing period is not the last testing period
+                # append the predictions and targets to the result list
                 result_list.append(
                     self.train(Epoch_num=Epoch_num, train_index=self.a.idx[start_index - train_size:start],
                                predict_index=self.a.idx[start:start + window_length], lr=None, names=None, pre=pre))
-            else:
+            else: # if the testing period is the last testing period
                 result_list.append(
                     self.train(Epoch_num=Epoch_num, train_index=self.a.idx[start_index - train_size:start],
                                predict_index=self.a.idx[start: T - 1], lr=None, names=None, pre=pre))
-        return result_list
+        return result_list # return the result list
 
 
 if __name__ == '__main__':
