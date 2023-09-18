@@ -138,6 +138,7 @@ def normalize(x):
             y[:,i] = winsorize(x[:,i],[0.01,0.01]) # Trim the data at 1% on both the low and high ends of the data distribution
     return y
 
+# ! Model ====================================================================
 
 class rolling_predict():
     def __init__(self, keywords = ['XVZ_volatility'], back_day = list(range(0,15)), lr = 0.001): 
@@ -164,26 +165,30 @@ class rolling_predict():
 
     def train(self, train_index, predict_index,  lr,  names, Epoch_num = 300, pre = True): # train the model
 
-        temp_train_start = np.where(self.a.idx == train_index[0])
-        temp_index_train = []
-        for i in temp_train_start[0]:
-            temp_index_train.extend(list(range(i, i + len(train_index))))
-        temp_predict_start = np.where(self.a.idx == predict_index[0])
+        temp_train_start = np.where(self.a.idx == train_index[0]) # get the index of the first training date
+        temp_index_train = [] # list of indices for training data
+
+        for i in temp_train_start[0]: # for each training date
+            temp_index_train.extend(list(range(i, i + len(train_index)))) # add the indices for the training data
+
+        temp_predict_start = np.where(self.a.idx == predict_index[0]) # get the index of the first prediction date
         temp_index_predict = []
+
         for i in temp_predict_start[0]:
-            temp_index_predict.extend(list(range(i, i + len(predict_index))))
-        train_x = self.a.x[temp_index_train]
-        train_y = self.a.y[temp_index_train]
-        test_x = self.a.x[temp_index_predict]
-        test_y = self.a.y[temp_index_predict]
+            temp_index_predict.extend(list(range(i, i + len(predict_index)))) # add the indices for the prediction data
+        
+        train_x = self.a.x[temp_index_train] # get the training predictor data
+        train_y = self.a.y[temp_index_train] # get the training target data
+        test_x = self.a.x[temp_index_predict] # get the test predictor data
+        test_y = self.a.y[temp_index_predict] # get the test target data
 
-        train_x = train_x.reshape(train_x.shape[0], -1)
-        test_x = test_x.reshape(test_x.shape[0], -1)
-        train_x = np.concatenate((np.ones((train_x.shape[0], 1)), train_x), axis=1)
-        test_x = np.concatenate((np.ones((test_x.shape[0], 1)), test_x), axis=1)
+        train_x = train_x.reshape(train_x.shape[0], -1) # reshape the training predictor data
+        test_x = test_x.reshape(test_x.shape[0], -1) # reshape the test predictor data
+        train_x = np.concatenate((np.ones((train_x.shape[0], 1)), train_x), axis=1) # add a column of ones to the training predictor data
+        test_x = np.concatenate((np.ones((test_x.shape[0], 1)), test_x), axis=1) # add a column of ones to the test predictor data
 
-        beta = np.matmul(np.matmul(np.linalg.inv(np.matmul(train_x.T, train_x)), train_x.T), train_y)
-        predict = np.matmul(test_x, beta)
+        beta = np.matmul(np.matmul(np.linalg.inv(np.matmul(train_x.T, train_x)), train_x.T), train_y) # calculate the beta
+        predict = np.matmul(test_x, beta) # calculate the prediction
 
         predict = np.reshape(predict, (-1, len(namelist)), 'F')
         test_y = np.reshape(test_y, (-1, len(namelist)), 'F')
@@ -192,11 +197,11 @@ class rolling_predict():
         plot_valid.index = date[(np.where(date == predict_index[0])[0][0] + 1):(
                 np.where(date == predict_index[-1])[0][0] + 2)]
         plot_valid.columns = [x + 'out' for x in namelist] + [x + 'real' for x in namelist]
-        return plot_valid
+        return plot_valid # returns the prediction and the real value
 
 
     def run(self, window_length, train_size, Epoch_num = 2, pre = True):
-        T = int(self.a.x.shape[0]/len(namelist))
+        T = int(self.a.x.shape[0]/len(namelist)) 
         result_list = []
         if args.freq != 'daily':
             start_index = np.where(self.a.idx == '2015-06-30'+'/'+'16:00')[0][0]
@@ -214,6 +219,8 @@ class rolling_predict():
                                predict_index=self.a.idx[start: T - 1], lr=None, names=None, pre=pre))
         return result_list
 
+
+# ! Run ======================================================================
 
 q = rolling_predict( back_day= args.back_day,
             lr=0.001)
@@ -233,27 +240,28 @@ elif  args.market == 1:
     pd.concat(result).to_csv('LSTM_SPY3_2.csv')
 '''
 
-if args.market == 0:
+# ! Report ===================================================================
+if args.market == 0: # if market is not augmented
     from sklearn.metrics import r2_score, mean_squared_error,mean_absolute_percentage_error
     if args.freq != 'daily':
         lstm_result = pd.read_csv(MYDIR+'/meta.csv',index_col=0).loc['2015-07-01/09:30':]
     else:
         lstm_result = pd.read_csv(MYDIR+'/meta.csv',index_col=0).loc['2015-07-01':]
-    report_df = pd.DataFrame(index = namelist,columns=['MSE','r2_score'])
+    report_df = pd.DataFrame(index = namelist,columns=['MSE','r2_score']) # init report df with MSE and r square
     for i in namelist:
-        report_df.loc[i,'MSE'] = mean_squared_error(lstm_result[i+'out'],lstm_result[i+'real'])
-        report_df.loc[i,'r2_score'] = r2_score( lstm_result[i + 'real'],lstm_result[i + 'out'])
-        report_df.loc[i,'MAPE'] = mean_absolute_percentage_error( lstm_result[i + 'real'],lstm_result[i + 'out'])
-    report_df.to_csv(MYDIR+'/meta_report.csv')
-elif  args.market == 1:
+        report_df.loc[i,'MSE'] = mean_squared_error(lstm_result[i+'out'],lstm_result[i+'real']) # calculate MSE
+        report_df.loc[i,'r2_score'] = r2_score( lstm_result[i + 'real'],lstm_result[i + 'out']) # calculate r square
+        report_df.loc[i,'MAPE'] = mean_absolute_percentage_error( lstm_result[i + 'real'],lstm_result[i + 'out']) # calculate MAPE
+    report_df.to_csv(MYDIR+'/meta_report.csv') # save report df
+elif  args.market == 1: # if market is augmented
     from sklearn.metrics import r2_score, mean_squared_error,mean_absolute_percentage_error
     if args.freq != 'daily':
         lstm_result = pd.read_csv(MYDIR+'/aug.csv',index_col=0).loc['2015-07-01/09:30':]
     else:
         lstm_result = pd.read_csv(MYDIR+'/aug.csv',index_col=0).loc['2015-07-01':]
-    report_df = pd.DataFrame(index = namelist,columns=['MSE','r2_score'])
+    report_df = pd.DataFrame(index = namelist,columns=['MSE','r2_score']) # init report df with MSE and r square
     for i in namelist:
-        report_df.loc[i,'MSE'] = mean_squared_error(lstm_result[i+'out'],lstm_result[i+'real'])
-        report_df.loc[i,'r2_score'] = r2_score( lstm_result[i + 'real'],lstm_result[i + 'out'])
-        report_df.loc[i,'MAPE'] = mean_absolute_percentage_error( lstm_result[i + 'real'],lstm_result[i + 'out'])
+        report_df.loc[i,'MSE'] = mean_squared_error(lstm_result[i+'out'],lstm_result[i+'real']) # calculate MSE
+        report_df.loc[i,'r2_score'] = r2_score( lstm_result[i + 'real'],lstm_result[i + 'out']) # calculate r square
+        report_df.loc[i,'MAPE'] = mean_absolute_percentage_error( lstm_result[i + 'real'],lstm_result[i + 'out']) # calculate MAPE
     report_df.to_csv(MYDIR+'/aug_report.csv')
