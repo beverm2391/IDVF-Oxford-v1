@@ -66,7 +66,7 @@ data = data.fillna(method='ffill') # fill missing values with previous values
 namelist = data.columns[:93] # list of stock names
 namelist = [x[:-4] for x in namelist] 
 
-# Windsorization (set values above 99.9 percentile to 99.9 percentile, set values below 0.1 percentile to 0.1 percentile)
+# set values above 99.9 percentile to 99.9 percentile, set values below 0.1 percentile to 0.1 percentile
 if args.freq != 'daily':
     for clm in data.columns:
         max_p = np.percentile(data[clm], 99.9) # 99.9 percentile
@@ -93,64 +93,76 @@ if args.market ==1:
 
 #%%
 
-date = data.index
+date = data.index 
 
 
 class preprocess():
     def __init__(self, input, target, back_day = list(range(0,15)), forward_day = 1):
+        # x attribute will hold the predictor variables
+        # y attribute will hold the target variable
+        # idx attribute will hold the date
+
         #input is a list of dataframes, for example [price,volatility] with index as the same as target.
         self.x = []
-        for _ in input:
-            self.x.append(np.expand_dims(np.array(pd.concat(list(map(lambda n: _.shift(n), back_day)), axis=1).reset_index(drop=True).loc[:,::-1]),axis =2))
-        self.x = np.concatenate(tuple(self.x),axis =2)
-        self.idx1 = [~np.any(np.isnan(p)) for p in self.x]
-        self.y = target.shift(-forward_day)
-        self.y = pd.DataFrame((self.y)).reset_index(drop=True)
-        self.idx2 = self.y.notna().all(axis = 1)
-        self.idx = np.logical_and(self.idx1, self.idx2)
+        for df in input:
+            # Shift the dataframe by each value in back_day and concatenate along columns
+            shifted_df = pd.concat(
+                list(map(lambda n: df.shift(n), back_day)), axis=1
+            ).reset_index(drop=True).loc[:, ::-1] # Also, reset index and drop to align with the target
+            self.x.append(np.expand_dims(np.array(shifted_df), axis=2)) # Expand dimensions to make it compatible for future concatenation
+        
+        self.x = np.concatenate(tuple(self.x), axis=2) # Concatenate all processed input data along the last axis
+        self.idx1 = [~np.any(np.isnan(p)) for p in self.x] # Create an index mask where none of the elements in the x dataframes are NaN
+        self.y = target.shift(-forward_day) # Shift the target by forward_day to align with predictor variables
+        self.y = pd.DataFrame((self.y)).reset_index(drop=True) # Reset index to align with self.x
+        self.idx2 = self.y.notna().all(axis=1) # Create an index mask where none of the elements in the y dataframe are NaN
+        self.idx = np.logical_and(self.idx1, self.idx2) # Combine the two index masks
+        
+        # Filter x and y data based on combined index mask
         self.x = self.x[self.idx]
-        self.y = np.array(self.y[self.idx].reset_index(drop = True))
+        self.y = np.array(self.y[self.idx].reset_index(drop=True))
 
-
+        # Filter date based on combined index mask
         self.idx = data.index[self.idx]
 
 
+# Winsorize to the 1st and 99th percentile
 def normalize(x):
     from scipy.stats.mstats import winsorize
-    y = np.empty_like(x)
-    if len(y.shape) == 3:
-        for i in range(x.shape[-1]):
-            y[:,:,i] = winsorize(x[:,:,i],[0.01,0.01])
-    else:
-        for i in range(x.shape[-1]):
-            y[:,i] = winsorize(x[:,i],[0.01,0.01])
+    y = np.empty_like(x) # Create an empty array with the same shape and type as x
+    if len(y.shape) == 3: # Handle 3D arrays
+        for i in range(x.shape[-1]): # Winsorize each 2D slice along the last axis of the 3D array
+            y[:,:,i] = winsorize(x[:,:,i],[0.01,0.01]) # Trim the data at 1% on both the low and high ends of the data distribution
+    else: # Handle 2D arrays
+        for i in range(x.shape[-1]): # Winsorize each column of the 2D array
+            y[:,i] = winsorize(x[:,i],[0.01,0.01]) # Trim the data at 1% on both the low and high ends of the data distribution
     return y
 
 
-
 class rolling_predict():
-    def __init__(self, keywords = ['XVZ_volatility'], back_day = list(range(0,15)), lr = 0.001):
-        self.back_day = back_day
-        self.lr = lr
-        self.keywords = keywords
-        temp = [data[namelist[0]+'_logvol']]
-        if args.market == 1:
+    def __init__(self, keywords = ['XVZ_volatility'], back_day = list(range(0,15)), lr = 0.001): 
+        self.back_day = back_day # list of days to look back
+        self.lr = lr # learning rate
+        self.keywords = keywords # list of keywords
+        temp = [data[namelist[0]+'_logvol']] # list of dataframes
+        if args.market == 1: # if market is augmented
             temp.append(data['mean'+'_logvol'])
-        self.a = preprocess(temp,data[namelist[0]+'_logvol'], back_day = back_day)
+        self.a = preprocess(temp,data[namelist[0]+'_logvol'], back_day = back_day) # preprocess the data
 
-        for ind in namelist[1:]:
+        for ind in namelist[1:]: # for each stock
             temp = []
-            for i in [ ind+'_logvol']:
+            for i in [ ind+'_logvol']: # for each keyword
 
                 temp.append(data[i])
                 if args.market == 1:
                     temp.append(data['mean' + '_logvol'])
-            temp_a = preprocess(temp,data[ind+'_logvol'], back_day = back_day)
-            self.a.x = np.concatenate([self.a.x, temp_a.x],axis = 0 )
-            self.a.y = np.concatenate([self.a.y, temp_a.y],axis = 0 )
-            self.a.idx = np.concatenate([self.a.idx, temp_a.idx],axis = 0 )
 
-    def train(self, train_index, predict_index,  lr,  names, Epoch_num = 300, pre = True):
+            temp_a = preprocess(temp,data[ind+'_logvol'], back_day = back_day) # preprocess the data
+            self.a.x = np.concatenate([self.a.x, temp_a.x],axis = 0 ) # concatenate the x data (predictor variables)
+            self.a.y = np.concatenate([self.a.y, temp_a.y],axis = 0 ) # concatenate the y data (target variable)
+            self.a.idx = np.concatenate([self.a.idx, temp_a.idx],axis = 0 ) # concatenate the date data
+
+    def train(self, train_index, predict_index,  lr,  names, Epoch_num = 300, pre = True): # train the model
 
         temp_train_start = np.where(self.a.idx == train_index[0])
         temp_index_train = []
