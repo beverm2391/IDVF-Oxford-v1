@@ -1,0 +1,64 @@
+FirstRate Data | Tick Data Bundle
+=============================
+
+Sample Files:
+MSFT Quote Data : 12-May-2023
+MSFT Trade Data : 12-May-2023
+GOOG Quote Data : 12-May-2023
+GOOG Trade Data : 12-May-2023
+
+
+
+
+Timezone : US Eastern Time
+
+
+Data Formats
+=============
+
+Both Trade and Quote Data are in csv format as below:
+
+
+Trade Data : 
+{timestamp yyyy-MM-dd HH:mm:ss.ssssss},{price},{volume},{exchange code (see below)},{trade conditions (see below)}
+
+Quote Data : 
+{timestamp yyyy-MM-dd HH:mm:ss.ssssss},{bid price},{bid volume},{bid exchange},{offer price},{offer volume},{offer exchange},{offer price}
+ 
+
+
+Exchange Codes
+---------------
+
+1 - Nasdaq
+2 - NYSE 
+3 - NYSE American
+4 - FINRA
+5 - Nasdaq OMX
+6 - NYSE National
+7 - Cboe
+8 - NYSE Arca
+9 - Investors Exchange
+10 - International Securities Exchange
+11 - Cboe BATS
+13 - Nasdaq Philadelphia
+
+
+
+Trade Codes
+-----------
+
+A - Acquisition (Trade executed as a result of an Exchange acquisition)
+B - Odd Lot Trade (Trade volume not in a defined trading lot for the security)
+C - Official Close (Trade identified as the exchange official close trade)
+D - Derivatively Priced (Trade not based on market quotations)
+E - Extended Hours (Trade executed outside of regular exchange trading hours - Form T)
+I - Distribution (Trade made as part of a larger block trade)
+L - Seller's Option (Trade executed with flexible delivery of  the seller's choice, with a maximum of T+60)
+M - Trade Thru Exempt (Trade has no condition attached that it is executed at the most favorable price across multiple exchanges)
+N - Next Day (Trade settling on the next trading day T+1)
+O - Official Open (Trade identified as the exchange official open trade)
+P - Prior Reference Price Trade (Trade executed at a price prior to the contemporarily traded prices)
+S - Intermarket Sweep (Trade was the execution due to an Intermarket Sweep Order.)
+T - Cash Sale (Trade requiring delivery of securities and payment on the same day the trade - T+0)
+
