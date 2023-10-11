@@ -5,4 +5,4 @@
   - [X] need to figure out how to handle missing and inconsistent data
 
 ## TODO
-- [ ] use the agg data to replicate the linear script in `linear-replivation-v1.ipynb`
+- [ ] use the agg data to replicate the linear script in `linear-replication-v1.ipynb`
