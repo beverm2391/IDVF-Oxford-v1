@@ -33,8 +33,10 @@ def get_nyse_date_tups(start: str, end: str = 'today', unix=False) -> List[Tuple
 
 # ! Data Utils ==================================================================
 
-def get_dfs(n=93):
+def get_oxford_dfs(n=93):
     """Returns a list of n dfs from the oxford-93-5yrs-minute dataset."""
+
+    assert n > 0 and n <= 93, "n must be between 1 and 93"
 
     DATA_DIR = "/Users/beneverman/Documents/Coding/bp-quant/shared_data/POLYGON/oxford-93-5yrs-minute"
     def _paths():
@@ -42,5 +44,6 @@ def get_dfs(n=93):
         assert len(paths) == 93, "Expected 93 paths, got {}".format(len(paths))
         return paths
     
-    dfs = [pd.read_csv(os.path.join(DATA_DIR, p)) for p in _paths()[:n]]
+    dfs = [pd.read_csv(os.path.join(DATA_DIR, p), index_col=0) for p in _paths()[:n]]
+    if len(dfs) == 1: return dfs[0] # if only one df, return it directly (not in a list)
     return dfs
