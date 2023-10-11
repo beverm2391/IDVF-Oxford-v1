@@ -1,6 +1,7 @@
 import pandas_market_calendars as mcal
 import pandas as pd
 from typing import List, Tuple
+import os
 
 # ! Market Utils ===============================================================
 
@@ -29,3 +30,17 @@ def get_nyse_date_tups(start: str, end: str = 'today', unix=False) -> List[Tuple
 
     assert tups is not None and len(tups) > 0, "tups must be non-empty. you probably provided dates that are not NYSE trading days."
     return tups
+
+# ! Data Utils ==================================================================
+
+def get_dfs(n=93):
+    """Returns a list of n dfs from the oxford-93-5yrs-minute dataset."""
+
+    DATA_DIR = "/Users/beneverman/Documents/Coding/bp-quant/shared_data/POLYGON/oxford-93-5yrs-minute"
+    def _paths():
+        paths = [p for p in os.listdir(DATA_DIR) if p.endswith(".csv")]
+        assert len(paths) == 93, "Expected 93 paths, got {}".format(len(paths))
+        return paths
+    
+    dfs = [pd.read_csv(os.path.join(DATA_DIR, p)) for p in _paths()[:n]]
+    return dfs
