@@ -6,5 +6,7 @@
 
 ## TODO
 - [ ] use the agg data to replicate the linear script in `linear-replication-full.ipynb`
-  - [ ] Fix rolling predict method, add tests/sanity checks
+  - [X] write unit tests/sanity checks for preprocessing class
+  - [X] Fix rolling predict method, add tests/sanity checks
+  - [ ] Make sure the Epoch_num passed to the RollingPredict.run() method is actually used
 - [ ] replicate the Lasso script
