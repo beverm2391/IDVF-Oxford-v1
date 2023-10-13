@@ -6,4 +6,5 @@
 
 ## TODO
 - [ ] use the agg data to replicate the linear script in `linear-replication-full.ipynb`
+  - [ ] Fix rolling predict method, add tests/sanity checks
 - [ ] replicate the Lasso script
