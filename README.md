@@ -9,5 +9,5 @@
 
 ## TODO
 - [ ] sanity check the linear script
-  - [ ] do some out of sample testing if not already done
+  - [ ] do some out of sample testing if not already done in the rolling predict (go back and check the paper)
 - [ ] replicate the Lasso script
