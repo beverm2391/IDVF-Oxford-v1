@@ -9,6 +9,7 @@ from sklearn.metrics import r2_score, mean_squared_error,mean_absolute_percentag
 from time import perf_counter
 import os
 import json
+import warnings
 
 from lib.utils import get_65min_aggs, rv
 
@@ -193,8 +194,8 @@ def main(args : argparse.Namespace):
 
             if train_size is None:
                 train_size = start_index # if train size is not specified, then set it to the start index
-            if train_size > start_index:
-                raise ValueError(f"Train size must be less than the start index. Your train size {train_size} is greater than the start index {start_index}")
+            assert train_size < start_index, f"Train size must be greater than the start index. Your train size: {train_size} is less than the start index {start_index}"
+            assert train_size > 0, f"Train size must be greater than 0. Your train size: {train_size} is less than 1"
 
             range_len = (seq_per_stock - start_index) // window_length + 1 # Example (expected number of windows)
             for window_start in range(start_index,  seq_per_stock-1, window_length): # creates a range with (start_idx, ppd_aggs -1, window_length) (i, o, step)
@@ -245,11 +246,33 @@ def main(args : argparse.Namespace):
     ## ! RUN AND SAVE =====================================================================
     
     q = RollingPredict(back_day=back_day)
-    results = q.run(window_length, train_size=train_size) # ! I dont think this epoch number is changing anything, fix
+    results = q.run(window_length, train_size=train_size)
     result = pd.concat(results)
     report = _make_report(result)
     args_dict = vars(args) # convert namespace to dict
 
+    def _check_for_leakage(report: pd.DataFrame):
+        dict_ = report.mean().to_dict()
+        error = False
+
+        # errors
+        if dict_['MSE'] < 0.01:
+            warnings.warn("WARNING: High MSE detected. Possible leakage.")
+            error = True
+
+        if dict_['r2_score'] > 0.9:
+            print("WARNING: High r2_score detected. Possible leakage.")
+            error = True
+
+        if dict_['MAPE'] < 0.1:
+            print("WARNING: High MAPE detected. Possible leakage.")
+            error = True
+
+        if error:
+            print("See report below:\n")
+            print(dict_)
+
+    _check_for_leakage(report)
     _save(result, report, args_dict)
 
 # ! MAIN ========================================================================
