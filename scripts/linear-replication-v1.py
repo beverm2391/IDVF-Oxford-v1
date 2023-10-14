@@ -5,11 +5,12 @@ from datetime import datetime
 from sklearn.metrics import r2_score, mean_squared_error,mean_absolute_percentage_error
 from time import perf_counter
 
+from lib.utils import get_65min_aggs, rv
 
 def main():
     # ! DATA PREPARATION =======================================================
 
-    data = pd.read_csv("/Users/beneverman/Documents/Coding/QuantHive/IDVF-Oxford-v1/data/processed-5yr-93-minute/65min.csv", index_col=0)
+    data = get_65min_aggs() # get the 65 minute aggregate bars
     num_agg_bars = data.shape[0] # number of aggregate bars
     # assuming 6 65-minute periods per day
     back_day = 6*20 # 20 days
@@ -23,21 +24,6 @@ def main():
     data.set_index('datetime', inplace=True)
 
     namelist = data.columns.tolist()
-
-    def rv(series: pd.Series, window: int) -> pd.Series:
-        """
-        Realized volatility is defined in [Volatility Forecasting with Machine Learning
-        and Intraday Commonality](https://arxiv.org/pdf/2202.08962.pdf) as:
-
-        $$RV_{i,t}(h)=\log(\sum_{s=t-h+1}^{t}r^2_{i,s})$$
-        """
-        assert window > 0, "Window must be greater than 0"
-        fuzz = 1e-16
-        log_returns = np.log(series).diff() # log returns
-        sum_of_squares = log_returns.rolling(window=window).apply(lambda x: np.sum(x**2), raw=True)
-        rv = np.log(sum_of_squares + fuzz)
-        assert rv.isna().sum() == window, "RV should have NaNs at the beginning" # ? should have one nan from logret and window - 1 from rolling = window
-        return rv
 
     for ind in namelist:
         data[ind + "_logvol"] = rv(data[ind], window_length)

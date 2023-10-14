@@ -2,6 +2,7 @@ import pandas_market_calendars as mcal
 import pandas as pd
 from typing import List, Tuple
 import os
+import numpy as np
 
 # ! Market Utils ===============================================================
 
@@ -47,3 +48,26 @@ def get_oxford_dfs(n=93):
     dfs = [pd.read_csv(os.path.join(DATA_DIR, p), index_col=0) for p in _paths()[:n]]
     if len(dfs) == 1: return dfs[0] # if only one df, return it directly (not in a list)
     return dfs
+
+def get_65min_aggs():
+    DATA_DIR = "/Users/beneverman/Documents/Coding/QuantHive/IDVF-Oxford-v1/data/processed-5yr-93-minute/65min.csv"
+    return pd.read_csv(DATA_DIR, index_col=0)
+
+
+# ! Stats Utils =================================================================
+
+def rv(series: pd.Series, window: int) -> pd.Series:
+    """
+    Realized volatility is defined in [Volatility Forecasting with Machine Learning
+    and Intraday Commonality](https://arxiv.org/pdf/2202.08962.pdf) as:
+
+    $$RV_{i,t}(h)=\log(\sum_{s=t-h+1}^{t}r^2_{i,s})$$
+    """
+    assert window > 0, "Window must be greater than 0"
+    fuzz = 1e-16
+    returns = series.pct_change() # returns
+    squared_returns = returns**2 # squared returns
+    sum_of_squares = squared_returns.rolling(window=window).sum() # sum of squared returns
+    rv = np.log(sum_of_squares + fuzz) # log of sum of squared returns
+    assert rv.isna().sum() == window, "RV should have NaNs at the beginning" # ? should have one nan from logret and window - 1 from rolling = window
+    return rv
