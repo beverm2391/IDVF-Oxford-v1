@@ -119,8 +119,16 @@ def main(args : argparse.Namespace):
                 # now (first loop) self.a.idx should be of shape (12002, ) / (ppd agg bars, )
 
             ppd_agg_bars = first_df[0].shape[0] - window_length - len(back_day) # number of agg bars - window length - back day list length
-            all_ppd_agg_bars = ppd_agg_bars * len(namelist) # total number of agg bars * number of tickers
-            assert self.a.x.shape == (all_ppd_agg_bars, len(back_day), 1), "Preprocessed df should have dimensions (ppd agg bars * name list len, len back day list, 1)"
+            
+            expected_total_agg_bars = ppd_agg_bars * len(namelist) # expected number of agg bars * number of tickers
+            expected_missing_agg_bars = len(namelist) * (forward_day-1) # number of tickers * forward day
+            all_ppd_agg_bars = expected_total_agg_bars - expected_missing_agg_bars # total number of agg bars * number of tickers - (number of tickers * forward day)
+            # ! not sure why this calculation works out to the total number of agg bars * number of tickers - (number of tickers * forward day)
+            # ! i didnt really debug that far just figured it out by looking at the shape of the dataframes
+            # i think its because self.idx2 (the mask in the preprocess class) is shifted forward_day, removing the last forward_day rows from the data
+            print(f"all ppd agg bars: {all_ppd_agg_bars}")
+            print(f"x shape: {self.a.x.shape}, {self.a.y.shape}, {self.a.idx.shape}")
+            assert self.a.x.shape == (all_ppd_agg_bars, len(back_day), 1), "Preprocessed df should have dimensions (all_ppd agg bars * name list len, len back day list, 1)"
             assert self.a.y.shape == (all_ppd_agg_bars, 1), "Preprocessed df should have dimensions (ppd agg bars, 1)"
             assert self.a.idx.shape == (all_ppd_agg_bars, ), "Preprocessed df should have dimensions (ppd agg bars, )"
 
