@@ -212,7 +212,7 @@ def main(args : argparse.Namespace):
 
             if train_size is None:
                 train_size = start_index # if train size is not specified, then set it to the start index
-            assert train_size < start_index, f"Train size must be greater than the start index. Your train size: {train_size} is less than the start index {start_index}"
+            assert train_size <= start_index, f"Train size must be greater than the start index. Your train size: {train_size} is less than the start index {start_index}"
             assert train_size > 0, f"Train size must be greater than 0. Your train size: {train_size} is less than 1"
 
             range_len = (seq_per_stock - start_index) // window_length + 1 # Example (expected number of windows)
