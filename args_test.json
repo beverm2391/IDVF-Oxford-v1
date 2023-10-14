@@ -1,0 +1,6 @@
+{
+    "back_day": 15,
+    "forward_day": 1,
+    "window_length": 1500,
+    "save_dir": "/Users/beneverman/Documents/Coding/QuantHive/IDVF-Oxford-v1/outputs/"
+}

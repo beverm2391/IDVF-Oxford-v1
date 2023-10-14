@@ -7,7 +7,6 @@ from typing import List, Dict
 from datetime import datetime
 from sklearn.metrics import r2_score, mean_squared_error,mean_absolute_percentage_error
 from time import perf_counter
-from dataclasses import dataclass, asdict
 import os
 import json
 
@@ -15,12 +14,10 @@ from lib.utils import get_65min_aggs, rv
 
 def main(args : argparse.Namespace):
     # ! Unpack args ===========================================================
-
-    back_day = list(range(args['back_day']))
-    forward_day = args['forward_day']
-    window_length = args['window_length']
-    SAVE_DIR = args['save_dir']
-
+    back_day = list(range(args.back_day)) # Ex. if user enters 15, range will be (0...14) where 0 will represent current day, all the way to 14th day back
+    forward_day = args.forward_day
+    window_length = args.window_length
+    SAVE_DIR = args.save_dir
 
     # ! DATA PREPARATION =======================================================
 
@@ -232,7 +229,7 @@ def main(args : argparse.Namespace):
             report_df.loc[i,'MAPE'] = mean_absolute_percentage_error( result[i + 'real'],result[i + 'out']) # calculate MAPE
         return report_df
     
-    def _save(result: pd.DataFrame, report_df: pd.DataFrame, args: Dict):
+    def _save(result: pd.DataFrame, report_df: pd.DataFrame, args_dict: Dict):
         if not os.path.exists(SAVE_DIR):
             os.makedirs(SAVE_DIR)
         subdir = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
@@ -240,9 +237,9 @@ def main(args : argparse.Namespace):
 
         result.to_csv(os.path.join(SAVE_DIR, subdir, "result.csv")) # save the result df
         report_df.to_csv(os.path.join(SAVE_DIR, subdir, "report.csv")) # save the report
-        
+
         with open(os.path.join(SAVE_DIR, subdir, "args.json"), "w") as f: # save the args
-            json.dump(args, f, indent=4)
+            json.dump(args_dict, f, indent=4)
         
     ## ! RUN AND SAVE =====================================================================
     
@@ -250,8 +247,9 @@ def main(args : argparse.Namespace):
     results = q.run(window_length) # ! I dont think this epoch number is changing anything, fix
     result = pd.concat(results)
     report = _make_report(result)
+    args_dict = vars(args) # convert namespace to dict
 
-    _save(result, report, args)
+    _save(result, report, args_dict)
 
 # ! MAIN ========================================================================
 
