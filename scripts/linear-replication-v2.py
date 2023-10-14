@@ -126,8 +126,8 @@ def main(args : argparse.Namespace):
             # ! not sure why this calculation works out to the total number of agg bars * number of tickers - (number of tickers * forward day)
             # ! i didnt really debug that far just figured it out by looking at the shape of the dataframes
             # i think its because self.idx2 (the mask in the preprocess class) is shifted forward_day, removing the last forward_day rows from the data
-            print(f"all ppd agg bars: {all_ppd_agg_bars}")
-            print(f"x shape: {self.a.x.shape}, {self.a.y.shape}, {self.a.idx.shape}")
+            # print(f"all ppd agg bars: {all_ppd_agg_bars}")
+            # print(f"x shape: {self.a.x.shape}, {self.a.y.shape}, {self.a.idx.shape}")
             assert self.a.x.shape == (all_ppd_agg_bars, len(back_day), 1), "Preprocessed df should have dimensions (all_ppd agg bars * name list len, len back day list, 1)"
             assert self.a.y.shape == (all_ppd_agg_bars, 1), "Preprocessed df should have dimensions (ppd agg bars, 1)"
             assert self.a.idx.shape == (all_ppd_agg_bars, ), "Preprocessed df should have dimensions (ppd agg bars, )"
@@ -149,11 +149,17 @@ def main(args : argparse.Namespace):
 
             for i in temp_predict_start[0]:
                 temp_index_predict.extend(list(range(i, i + len(predict_index)))) # add the indices for the prediction data
-            
-            train_x = self.a.x[temp_index_train] # get the training predictor data
-            train_y = self.a.y[temp_index_train] # get the training target data
-            test_x = self.a.x[temp_index_predict] # get the test predictor data
-            test_y = self.a.y[temp_index_predict] # get the test target data
+
+            # ! LEAKAGE RULES
+            # 1. Nothing in Y can be found in X (and vice versa)
+            # 2. Nothing in test can be found in train (and vice versa)
+
+            train_x = self.a.x[temp_index_train] # (num_aggs, back_day, 1), ex (6001, 15, 1)
+            train_y = self.a.y[temp_index_train] # (num_aggs, 1) ex (6001, 1)
+            test_x = self.a.x[temp_index_predict] # (num_aggs, back_day, 1) ex (1000, 15, 1)
+            test_y = self.a.y[temp_index_predict] # (num_aggs, 1) ex (1000, 1)
+            # ! axes are (rows (time), columns (features), channels (dfs)
+            # print(f"Shapes: train_x: {train_x.shape}, train_y: {train_y.shape}, test_x: {test_x.shape}, test_y: {test_y.shape}")
 
             train_x = train_x.reshape(train_x.shape[0], -1) # reshape the training predictor data
             test_x = test_x.reshape(test_x.shape[0], -1) # reshape the test predictor data
@@ -198,7 +204,11 @@ def main(args : argparse.Namespace):
 
             seq_per_stock = int(self.a.x.shape[0]/len(namelist)) # use int to prevent float. T is the number of agg bars per ticker, so ppd agg bars
             result_list = []
-            start_index = np.where(self.a.idx == test_start_date)[0][0] # get the index of the first prediction date for the first ticker
+
+            try:
+                start_index = np.where(self.a.idx == test_start_date)[0][0] # get the index of the first prediction date for the first ticker
+            except:
+                raise ValueError(f"Test start date {test_start_date} not found in index {self.a.idx}. Try a different date")
 
             if train_size is None:
                 train_size = start_index # if train size is not specified, then set it to the start index
