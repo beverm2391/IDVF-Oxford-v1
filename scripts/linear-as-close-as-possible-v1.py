@@ -158,8 +158,16 @@ result = q.run(window_length, train_size, Epoch_num = 2,pre = False)
 # ! REPORTING AND SAVING (modified) ================================================
 def _make_report(result: pd.DataFrame):
         report_df = pd.DataFrame(index = namelist,columns=['MSE','r2_score']) # init report df with MSE and r square
+        
+        test_start_date = '2020-06-30' # this is the last date of train, so test will start on the next day
+        test_start_date = pd.Timestamp(f'{test_start_date} 9:30', tz='US/Eastern')
+        # start the result df freom the test start date
+        result = result.loc[test_start_date:]
+
         for i in namelist:
-            report_df.loc[i,'MSE'] = mean_squared_error(result[i+'out'],result[i+'real']) # calculate MSE
+            # report_df.loc[i,'MSE'] = mean_squared_error(result[i+'out'],result[i+'real']) # calculate MSE
+            # ! this original code is technically backwards but its sqared so it doesn't matter
+            report_df.loc[i,'MSE'] = mean_squared_error( result[i + 'real'],result[i + 'out']) # calculate MSE
             report_df.loc[i,'r2_score'] = r2_score( result[i + 'real'],result[i + 'out']) # calculate r square
             report_df.loc[i,'MAPE'] = mean_absolute_percentage_error( result[i + 'real'],result[i + 'out']) # calculate MAPE
         return report_df

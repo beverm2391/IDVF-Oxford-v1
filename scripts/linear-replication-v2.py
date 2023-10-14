@@ -249,7 +249,7 @@ def main(args : argparse.Namespace):
             report_df.loc[i,'MAPE'] = mean_absolute_percentage_error( result[i + 'real'],result[i + 'out']) # calculate MAPE
         return report_df
     
-    def _save(result: pd.DataFrame, report_df: pd.DataFrame, args_dict: Dict):
+    def _save(result: pd.DataFrame, report_df: pd.DataFrame, args_dict: Dict, SAVE_DIR=SAVE_DIR):
         if not os.path.exists(SAVE_DIR):
             os.makedirs(SAVE_DIR)
         subdir = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
