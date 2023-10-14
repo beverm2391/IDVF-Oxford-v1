@@ -17,6 +17,7 @@ def main(args : argparse.Namespace):
     back_day = list(range(args.back_day)) # Ex. if user enters 15, range will be (0...14) where 0 will represent current day, all the way to 14th day back
     forward_day = args.forward_day
     window_length = args.window_length
+    train_size = args.train_size
     SAVE_DIR = args.save_dir
 
     # ! DATA PREPARATION =======================================================
@@ -244,7 +245,7 @@ def main(args : argparse.Namespace):
     ## ! RUN AND SAVE =====================================================================
     
     q = RollingPredict(back_day=back_day)
-    results = q.run(window_length) # ! I dont think this epoch number is changing anything, fix
+    results = q.run(window_length, train_size=train_size) # ! I dont think this epoch number is changing anything, fix
     result = pd.concat(results)
     report = _make_report(result)
     args_dict = vars(args) # convert namespace to dict
@@ -259,6 +260,7 @@ if __name__ == "__main__":
     parser.add_argument("--back_day", type=int, default=15, help="Number of back days")
     parser.add_argument("--forward_day", type=int, default=1, help="Forward day")
     parser.add_argument("--window_length", type=int, default=6*250, help="Window length")
+    parser.add_argument("--train_size", type=int, default=None, help="Train size. None will use the max possible train size")
     parser.add_argument("--save_dir", type=str, default='/Users/beneverman/Documents/Coding/QuantHive/IDVF-Oxford-v1/outputs/', help="Save directory")
 
     args = parser.parse_args()
