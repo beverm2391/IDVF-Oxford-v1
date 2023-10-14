@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import pandas as pd
 import numpy as np
 from typing import List, Dict
@@ -12,13 +13,13 @@ import json
 
 from lib.utils import get_65min_aggs, rv
 
-def main(main_args : MainArguments):
+def main(args : argparse.Namespace):
     # ! Unpack args ===========================================================
 
-    back_day = main_args['back_day']
-    forward_day = main_args['forward_day']
-    window_length = main_args['window_length']
-    SAVE_DIR = main_args['save_dir']
+    back_day = list(range(args['back_day']))
+    forward_day = args['forward_day']
+    window_length = args['window_length']
+    SAVE_DIR = args['save_dir']
 
 
     # ! DATA PREPARATION =======================================================
@@ -231,7 +232,7 @@ def main(main_args : MainArguments):
             report_df.loc[i,'MAPE'] = mean_absolute_percentage_error( result[i + 'real'],result[i + 'out']) # calculate MAPE
         return report_df
     
-    def _save(result: pd.DataFrame, report_df: pd.DataFrame, args_dict: Dict):
+    def _save(result: pd.DataFrame, report_df: pd.DataFrame, args: Dict):
         if not os.path.exists(SAVE_DIR):
             os.makedirs(SAVE_DIR)
         subdir = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
@@ -240,9 +241,8 @@ def main(main_args : MainArguments):
         result.to_csv(os.path.join(SAVE_DIR, subdir, "result.csv")) # save the result df
         report_df.to_csv(os.path.join(SAVE_DIR, subdir, "report.csv")) # save the report
         
-
         with open(os.path.join(SAVE_DIR, subdir, "args.json"), "w") as f: # save the args
-            json.dump(main_args, f, indent=4)
+            json.dump(args, f, indent=4)
         
     ## ! RUN AND SAVE =====================================================================
     
@@ -250,30 +250,23 @@ def main(main_args : MainArguments):
     results = q.run(window_length) # ! I dont think this epoch number is changing anything, fix
     result = pd.concat(results)
     report = _make_report(result)
-    args_dict = asdict(main_args) # convert the args to a dict
 
-    _save(result, report, args_dict)
+    _save(result, report, args)
 
 # ! MAIN ========================================================================
 
 if __name__ == "__main__": 
 
-    @dataclass # i think this needs to stay outside of if __name__ == "__main__"
-    class MainArguments:
-        back_day : list
-        forward_day : int
-        window_length : int
-        save_dir : str
+    parser = argparse.ArgumentParser(description="Linear logvol forecast")
+    parser.add_argument("--back_day", type=int, default=15, help="Number of back days")
+    parser.add_argument("--forward_day", type=int, default=1, help="Forward day")
+    parser.add_argument("--window_length", type=int, default=6*250, help="Window length")
+    parser.add_argument("--save_dir", type=str, default='/Users/beneverman/Documents/Coding/QuantHive/IDVF-Oxford-v1/outputs/', help="Save directory")
 
-    main_args = MainArguments({
-        "back_day" : list(range(0, 15)),
-        "forward_day" : 1,
-        "window_length" : 6*250,
-        "save_dir" : '/Users/beneverman/Documents/Coding/QuantHive/IDVF-Oxford-v1/outputs/'
-    })
+    args = parser.parse_args()
 
     print("Running linear-replication-v1.py")
     start = perf_counter()
-    main(main_args)
+    main(args)
     elapsed = perf_counter() - start
     print(f"Finished in {elapsed:0.2f} seconds")
