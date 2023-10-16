@@ -50,9 +50,12 @@ def get_oxford_dfs(n=93):
     return dfs
 
 def get_65min_aggs():
-    DATA_DIR = "/Users/beneverman/Documents/Coding/QuantHive/IDVF-Oxford-v1/data/processed-5yr-93-minute/65min.csv"
+    DATA_DIR = "/Users/beneverman/Documents/Coding/QuantHive/IDVF-Oxford-v1/data/processed-5yr-93-minute/65min_aggs.csv"
     return pd.read_csv(DATA_DIR, index_col=0)
 
+def get_65min_rv():
+    DATA_DIR = "/Users/beneverman/Documents/Coding/QuantHive/IDVF-Oxford-v1/data/processed-5yr-93-minute/65min_rv.csv"
+    return pd.read_csv(DATA_DIR, index_col=0)
 
 # ! Stats Utils =================================================================
 

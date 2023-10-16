@@ -19,8 +19,11 @@ train_size = 1000 #! MODIFIED for smaller dataset
 
 data = data.ffill()
 data = data.bfill()
+assert data.isna().sum().sum() == 0
 
+data['datetime'] = pd.to_datetime(data['datetime'], utc=True).dt.tz_convert('US/Eastern')
 data.set_index('datetime', inplace=True)
+
 namelist = data.columns.tolist()
 data.columns = [f"{col}_logvol"  for col in data.columns]
 date = data.index
@@ -114,7 +117,7 @@ class rolling_predict():
 
         # ! MODIFIED CODE =========================================================
         test_start_date = '2020-06-30' # this is the last date of train, so test will start on the next day
-        test_start_date = pd.Timestamp(f'{test_start_date} 9:30', tz='US/Eastern')
+        test_start_date = pd.Timestamp(f'{test_start_date} 10:35', tz='US/Eastern') #! this dataset uses intervals form 10:35-16:00 so this should be 10:35 not 9:30
         start_index = np.where(self.a.idx == test_start_date)[0][0]
         # ! END MODIFIED CODE =====================================================
 
@@ -140,7 +143,7 @@ def _make_report(result: pd.DataFrame):
         report_df = pd.DataFrame(index = namelist,columns=['MSE','r2_score']) # init report df with MSE and r square
         
         test_start_date = '2020-06-30' # this is the last date of train, so test will start on the next day
-        test_start_date = pd.Timestamp(f'{test_start_date} 9:30', tz='US/Eastern')
+        test_start_date = pd.Timestamp(f'{test_start_date} 10:35', tz='US/Eastern') #! this dataset uses intervals form 10:35-16:00 so this should be 10:35 not 9:30
         # start the result df freom the test start date
         result = result.loc[test_start_date:]
 

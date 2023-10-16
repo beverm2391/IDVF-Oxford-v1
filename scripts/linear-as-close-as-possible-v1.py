@@ -173,7 +173,7 @@ def _make_report(result: pd.DataFrame):
         return report_df
     
 def _save(result: pd.DataFrame, report_df: pd.DataFrame, args_dict: Dict = None):
-    SAVE_DIR = "/Users/beneverman/Documents/Coding/QuantHive/IDVF-Oxford-v1/outputs/"
+    SAVE_DIR = "/Users/beneverman/Documents/Coding/QuantHive/IDVF-Oxford-v1/outputs/linear-as-close-as-possible-v1/"
     if not os.path.exists(SAVE_DIR):
         os.makedirs(SAVE_DIR)
     subdir = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
