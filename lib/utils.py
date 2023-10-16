@@ -72,3 +72,10 @@ def rv(series: pd.Series, window: int) -> pd.Series:
     rv = np.log(sum_of_squares + fuzz) # log of sum of squared returns
     assert rv.isna().sum() == window, "RV should have NaNs at the beginning" # ? should have one nan from logret and window - 1 from rolling = window
     return rv
+
+def rv_single_window(x: pd.Series):
+    """RV over a single window/bin of time"""
+    log_returns = np.log(x / x.shift(1))
+    squared_log_returns = log_returns ** 2
+    rv = np.log(squared_log_returns.sum() + 1e-16)
+    return rv
