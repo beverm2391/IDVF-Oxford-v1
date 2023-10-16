@@ -65,8 +65,9 @@ def rv(series: pd.Series, window: int) -> pd.Series:
     """
     assert window > 0, "Window must be greater than 0"
     fuzz = 1e-16
-    returns = series.pct_change() # returns
-    squared_returns = returns**2 # squared returns
+    # returns = series.pct_change() # returns
+    log_returns = np.log(series / series.shift(1)) # log returns
+    squared_returns = log_returns**2 # squared returns
     sum_of_squares = squared_returns.rolling(window=window).sum() # sum of squared returns
     rv = np.log(sum_of_squares + fuzz) # log of sum of squared returns
     assert rv.isna().sum() == window, "RV should have NaNs at the beginning" # ? should have one nan from logret and window - 1 from rolling = window

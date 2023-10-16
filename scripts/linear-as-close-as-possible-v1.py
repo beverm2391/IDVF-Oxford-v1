@@ -30,7 +30,7 @@ data.set_index('datetime', inplace=True)
 namelist = data.columns.tolist()
 
 for ind in namelist:
-    data[ind + "_logvol"] = rv(data[ind], 21*6) # 21 days * 6 65-minute periods per day
+    data[ind + "_logvol"] = rv(data[ind], 6) # 21 days * 6 65-minute periods per day
 
 date = data.index
 
