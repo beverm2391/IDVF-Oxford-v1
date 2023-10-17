@@ -136,6 +136,7 @@ def normalize(x):
         for i in range(x.shape[-1]):
             y[:,i] = winsorize(x[:,i],[0.01,0.01])
     return y
+
 class rolling_predict():
     def __init__(self, keywords = ['XVZ_volatility'], back_day = list(range(0,15)), lr = 0.001):
         self.back_day = back_day
