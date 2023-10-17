@@ -10,7 +10,9 @@
   - [X] do some out of sample testing if not already done in the rolling predict (go back and check the paper)
 
 ## TODO
-- [ ] replicate the Lasso script
-- [ ] replicate the HARD script
+- [ ] get Lasso running
+- [ ] get HARD running
+- [ ] get the MLP running
+  - [ ] substitute for an LSTM
 - [ ] start to refactor parts of the codebase into reusable modules/rework abstractions
 - [ ] run a naive report on new rv dataset
