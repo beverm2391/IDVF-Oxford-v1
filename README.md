@@ -6,8 +6,11 @@
 - [X] use the agg data to replicate the linear script in `linear-replication-full.ipynb`
   - [X] write unit tests/sanity checks for preprocessing class
   - [X] Fix rolling predict method, add tests/sanity checks
+- [X] sanity check the linear script
+  - [X] do some out of sample testing if not already done in the rolling predict (go back and check the paper)
 
 ## TODO
-- [ ] sanity check the linear script
-  - [ ] do some out of sample testing if not already done in the rolling predict (go back and check the paper)
 - [ ] replicate the Lasso script
+- [ ] replicate the HARD script
+- [ ] start to refactor parts of the codebase into reusable modules/rework abstractions
+- [ ] run a naive report on new rv dataset
