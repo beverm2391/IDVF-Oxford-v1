@@ -238,3 +238,18 @@ for i in namelist:
     report_df.loc[i,'r2_score'] = r2_score( lstm_result[i + 'real'],lstm_result[i + 'out'])
     report_df.loc[i,'MAPE'] = mean_absolute_percentage_error( lstm_result[i + 'real'],lstm_result[i + 'out'])
 report_df.to_csv(MYDIR+'/meta_report.csv')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
