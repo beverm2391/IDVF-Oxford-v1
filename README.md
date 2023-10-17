@@ -22,9 +22,10 @@ The data is processed in 3 ways:
   - [X] Fix rolling predict method, add tests/sanity checks
 - [X] sanity check the linear script
   - [X] do some out of sample testing if not already done in the rolling predict (go back and check the paper)
+- [X] get Lasso running
 
 ## TODO
-- [ ] get Lasso running
+
 - [ ] get HARD running
 - [ ] get the MLP running
   - [ ] substitute for an LSTM
