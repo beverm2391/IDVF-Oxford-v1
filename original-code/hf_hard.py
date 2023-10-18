@@ -161,6 +161,7 @@ class rolling_predict():
             self.a.x = np.concatenate([self.a.x, temp_a.x], axis=0)
             self.a.y = np.concatenate([self.a.y, temp_a.y], axis=0)
             self.a.idx = np.concatenate([self.a.idx, temp_a.idx], axis=0)
+
     def train(self, train_index, predict_index,  lr,  names, Epoch_num = 300, pre = True):
 
         temp_train_start = np.where(self.a.idx == train_index[0])
