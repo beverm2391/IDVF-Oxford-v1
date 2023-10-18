@@ -10,7 +10,6 @@ The data is processed in 3 ways:
 3. 65min log returns
    1. calculated as log((last trade in 65min bin) - log(first trade in 65min bin))
    2. `preprocess-5y-93-v4.ipynb`
-   
 
 ## Completed
 - [X] make a bool to filter out premarket data
