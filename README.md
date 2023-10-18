@@ -27,11 +27,11 @@ The data is processed in 3 ways:
   - [X] diff check it against LASSO (if it uses ret) or Linear if it doesn't
   - [X] get it working in a notebook
   - [X] port over to a script
-
+- [X] get the MLP running
 
 ## TODO
-- [ ] get the MLP running
-- [ ] get an LSTM running
+
 - [ ] start to refactor parts of the codebase into reusable modules/rework abstractions
 - [ ] run a naive report on new rv dataset
 - [ ] start comparing the different models by changing 1 thing at a time and observing the difference
+- [ ] get an LSTM running
