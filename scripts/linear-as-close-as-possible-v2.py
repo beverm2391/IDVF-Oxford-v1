@@ -149,7 +149,7 @@ def _make_report(result: pd.DataFrame):
 
         for i in namelist:
             # report_df.loc[i,'MSE'] = mean_squared_error(result[i+'out'],result[i+'real']) # calculate MSE
-            # ! this original code is technically backwards but its sqared so it doesn't matter
+            # ! this original code is technically backwards but its squared so it doesn't matter
             report_df.loc[i,'MSE'] = mean_squared_error( result[i + 'real'],result[i + 'out']) # calculate MSE
             report_df.loc[i,'r2_score'] = r2_score( result[i + 'real'],result[i + 'out']) # calculate r square
             report_df.loc[i,'MAPE'] = mean_absolute_percentage_error( result[i + 'real'],result[i + 'out']) # calculate MAPE
