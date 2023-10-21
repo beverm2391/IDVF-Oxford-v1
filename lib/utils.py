@@ -34,6 +34,10 @@ def get_nyse_date_tups(start: str, end: str = 'today', unix=False) -> List[Tuple
 
 # ! Data Utils ==================================================================
 
+def get_93():
+    """Returns the 93 stocks included in the Oxford IV Paper"""
+    return ['AAPL','ACN','ADBE','ADP','AVGO','CRM','CSCO','FIS','FISV','IBM','INTC','INTU','MA','MSFT','MU','NVDA','ORCL','QCOM','TXN','V','ABT','AMGN','BDX','BMY','BSX','CI','CVS','DHR','GILD','ISRG','JNJ','LLY','MDT','MRK','PFE','SYK','TMO','UNH','VRTX','AXP','BAC','BLK','BRK.B','C','CB','CME','GS','JPM','MMC','MS','PNC','SCHW','USB','WFC','BA','CAT','CSX','GE','HON','LMT','MMM','UNP','UPS','AMZN','HD','LOW','MCD','NKE','SBUX','TGT','TJX','CL','COST','KO','MO','PEP','PG','PM','WMT','CMCSA','DIS','GOOG','NFLX','T','VZ','AMT','CCI','COP','CVX','D','DUK','SO','XOM']
+
 def get_oxford_dfs(n=93):
     """Returns a list of n dfs from the oxford-93-5yrs-minute dataset."""
 
