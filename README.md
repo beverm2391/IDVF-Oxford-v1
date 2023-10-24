@@ -27,11 +27,14 @@ The data is processed in 3 ways:
   - [X] get it working in a notebook
   - [X] port over to a script
 - [X] get the MLP running
+- [X] start to refactor parts of the codebase into reusable modules/rework abstractions
+  - [X] figure out why the run() func is only looping 3 times (should be 4?) - add some assert statement in for expected vs actual num models
 
 ## TODO
 
-- [X] start to refactor parts of the codebase into reusable modules/rework abstractions
-  - [ ] figure out why the run() func is only looping 3 times (should be 4?) - add some assert statement in for expected vs actual num models
+- [ ] add the LASSO and HARD model classes
+- [ ] add the MLP model class
+- [ ] implement the training loop for the MLP
 - [ ] run a naive report on new rv dataset
 - [ ] start comparing the different models by changing 1 thing at a time and observing the difference
 - [ ] get an LSTM running
