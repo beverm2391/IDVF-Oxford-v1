@@ -1,5 +1,7 @@
 from lib.core import *
 
+# TODO: make this use DNN - right now this is just placeholder
+
 def main():
     back_day = 15
     back_day = list(range(back_day))
