@@ -254,11 +254,9 @@ class RollingPredict:
 
         return result_list
 
-def _make_report(result: pd.DataFrame, namelist):
+def _make_report(result: pd.DataFrame, namelist, test_start_dt_str):
         report_df = pd.DataFrame(index = namelist,columns=['MSE','r2_score']) # init report df with MSE and r square
-        
-        test_start_date = '2020-06-30' # this is the last date of train, so test will start on the next day
-        test_start_date = pd.Timestamp(f'{test_start_date} 10:35', tz='US/Eastern') #! this dataset uses intervals form 10:35-16:00 so this should be 10:35 not 9:30
+        test_start_date = pd.Timestamp(test_start_dt_str, tz='US/Eastern') #! this dataset uses intervals form 10:35-16:00 so this should be 10:35 not 9:30
         # start the result df freom the test start date
         result = result.loc[test_start_date:]
 
@@ -298,13 +296,12 @@ def main():
 
     test_start_dt_str = '2020-06-30 10:35'
 
-
     rp_args = [back_day, rv_data, namelist, window_length, forward_day]
     q = RollingPredict(*rp_args)
     result = q.run(window_length, train_size, test_start_dt_str)
     result = pd.concat(result) # concat the result list into a df
 
-    report_df = _make_report(result, namelist) # make the report df
+    report_df = _make_report(result, namelist, test_start_dt_str) # make the report df
     _save(result, report_df)
 
 
