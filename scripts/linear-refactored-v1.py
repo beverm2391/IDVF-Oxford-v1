@@ -238,7 +238,7 @@ class RollingPredict:
             train_idx_start = self.preprocess_obj.idx[start_index - train_size:start]
             
             # min function to handle the edge case for the last window
-            predict_idx_range = self.preprocess_obj.idx[start:min(start + window_length, T)] # T not T-1 because range is exclusive
+            predict_idx_range = self.preprocess_obj.idx[start:min(start + window_length, T-1)]
 
             kwargs = {
                 "train_index": train_idx_start,
@@ -254,17 +254,13 @@ class RollingPredict:
 
         return result_list
 
-def _make_report(result: pd.DataFrame, namelist: List[str], test_start_dt_str: str):
+def _make_report(result: pd.DataFrame, namelist):
         report_df = pd.DataFrame(index = namelist,columns=['MSE','r2_score']) # init report df with MSE and r square
         
-        test_start_dt = pd.Timestamp(test_start_dt_str, tz='US/Eastern') #! this dataset uses intervals form 10:35-16:00 so this should be 10:35 not 9:30
-        
-        # start the result df freom the test start date or soonst possible date after that
-        if not test_start_dt in result.index:
-            start_dt = result.index[result.index > test_start_dt][0]
-            result = result.loc[start_dt:]
-        else:
-            result = result.loc[test_start_dt:]
+        test_start_date = '2020-06-30' # this is the last date of train, so test will start on the next day
+        test_start_date = pd.Timestamp(f'{test_start_date} 10:35', tz='US/Eastern') #! this dataset uses intervals form 10:35-16:00 so this should be 10:35 not 9:30
+        # start the result df freom the test start date
+        result = result.loc[test_start_date:]
 
         for i in namelist:
             # report_df.loc[i,'MSE'] = mean_squared_error(result[i+'out'],result[i+'real']) # calculate MSE
@@ -287,6 +283,7 @@ def _save(result: pd.DataFrame, report_df: pd.DataFrame, args_dict: Dict = None)
     with open(os.path.join(SAVE_DIR, subdir, "args.json"), "w") as f: # save the args
         json.dump(args_dict, f, indent=4)
 
+
 def main():
 
     back_day = 15
@@ -306,7 +303,7 @@ def main():
     result = q.run(window_length, train_size, test_start_dt_str)
     result = pd.concat(result) # concat the result list into a df
 
-    report_df = _make_report(result, namelist, test_start_dt_str) # make the report df
+    report_df = _make_report(result, namelist) # make the report df
     _save(result, report_df)
 
 
