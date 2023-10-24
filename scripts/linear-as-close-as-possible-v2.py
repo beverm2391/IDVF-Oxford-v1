@@ -113,6 +113,7 @@ class rolling_predict():
 
     def run(self, window_length, train_size, Epoch_num = 2, pre = True):
         T = int(self.a.x.shape[0]/len(namelist))
+        # print(f"Total number of observations: {T}")
         result_list = []
 
         # ! MODIFIED CODE =========================================================
