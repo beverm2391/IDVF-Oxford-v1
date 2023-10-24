@@ -269,7 +269,8 @@ def _make_report(result: pd.DataFrame, namelist):
             report_df.loc[i,'r2_score'] = r2_score( result[i + 'real'],result[i + 'out']) # calculate r square
             report_df.loc[i,'MAPE'] = mean_absolute_percentage_error( result[i + 'real'],result[i + 'out']) # calculate MAPE
         return report_df
-    
+
+
 def _save(result: pd.DataFrame, report_df: pd.DataFrame, args_dict: Dict = None):
     SAVE_DIR = "/Users/beneverman/Documents/Coding/QuantHive/IDVF-Oxford-v1/outputs/linear-refactored-v1/"
     if not os.path.exists(SAVE_DIR):
@@ -290,7 +291,7 @@ def main():
     back_day = list(range(back_day))
     window_length = 6*250
     train_size = 1000 #! MODIFIED for smaller dataset
-    forward_day = 10
+    forward_day = 1
 
     rv_data = pd.read_csv('/Users/beneverman/Documents/Coding/QuantHive/IDVF-Oxford-v1/data/processed-5yr-93-minute/65min_rv.csv', index_col=0)
     rv_data, date, namelist = initial_preprocess(rv_data, windsorize=False)
