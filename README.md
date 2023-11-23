@@ -10,7 +10,7 @@ Academic research serves to introduce novel ideas and methodologies, typical in 
 
 The first author, [Chao Zhang](https://sites.google.com/view/chaozhang94/) was kind enough to share the original code, which served as a starting point for my replication - which includes a custom dataset and refactored code for readability and reusability. The original dataset, [Lobster](https://lobsterdata.com/) is more expensive than I can afford, so I wrote a custom client to pull large amounts of minute data from [Polygon](https://polygon.io/). That was a project in and of itself, can can be found in [this repo](https://github.com/beverm2391/AsyncFetcher-v1). Then, I reverse engineered the original code to understand the data processing and model training. I refactored the code to be more modular and extensible. 
 
-I was able to produce similar results to the original paper using my new dataset and refactored code.
+I was able to produce similar results to the original paper using my new dataset and refactored code. The `dnn-refactored-v1.py` script is the most performant model (MLP).
 
 ## Data
 
