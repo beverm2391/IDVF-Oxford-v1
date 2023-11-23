@@ -1,7 +1,25 @@
+# Intraday Volatility Forecasting with Deep Learning
+
+
+## Background
+This repo serves to mark my efforts to forecast volatility using deep learning. While working on my own deep learning models to forecast volatility, I found [this]([/Users/beneverman/Documents/Coding/QuantHive/IDVF-Oxford-v1/IDVF_Oxford.pdf](https://academic.oup.com/jfec/advance-article/doi/10.1093/jjfinec/nbad005/7081291)) paper by a group of researchers as Oxford. The paper was fascinating, as the researchers discovered commonality between securities in their intraday volatility patterns. They leveraged this commonality to train forecasting models on a subset of securities. 
+
+Academic research serves to introduce novel ideas and methodologies, typical in the absence of a specific application or use. My interest in forecasting volatility is driven by the fact that, in theory, one who can accurately forecast volatility can leverage options strategies to generate significant returns.
+
+## Replication
+
+The first author, [Chao Zhang](https://sites.google.com/view/chaozhang94/) was kind enough to share the original code, which served as a starting point for my replication - which includes a custom dataset and refactored code for readability and reusability. The original dataset, [Lobster](https://lobsterdata.com/) is more expensive than I can afford, so I wrote a custom client to pull large amounts of minute data from [Polygon](https://polygon.io/). That was a project in and of itself, can can be found in [this repo](https://github.com/beverm2391/AsyncFetcher-v1). Then, I reverse engineered the original code to understand the data processing and model training. I refactored the code to be more modular and extensible. 
+
+I was able to produce similar results to the original paper using my new dataset and refactored code.
+
 ## Data
+
+*I have not included my dataset in this repo, as it is too large. If you want it, shoot me an [email](mailto:evermanben@gmail.com) and I'll send it to you.*
+
 ### processed-5yr-93-minute
 This includes 5yrs of raw minute data from Polygon from 2018-10-11 to 2023-10-09
 The data is processed in 3 ways:
+
 1. 65min aggregates (open, high, low, close, volume)
    1. includes a 9:30 period, but not a 16:00 period
 2. 65min Realized Volatility (RV)
