@@ -2,7 +2,7 @@
 
 
 ## Background
-This repo serves to mark my efforts to forecast volatility using deep learning. While working on my own deep learning models to forecast volatility, I found [this]([/Users/beneverman/Documents/Coding/QuantHive/IDVF-Oxford-v1/IDVF_Oxford.pdf](https://academic.oup.com/jfec/advance-article/doi/10.1093/jjfinec/nbad005/7081291)) paper by a group of researchers as Oxford. The paper was fascinating, as the researchers discovered commonality between securities in their intraday volatility patterns. They leveraged this commonality to train forecasting models on a subset of securities. 
+This repo serves to mark my efforts to forecast volatility using deep learning. While working on proprietary deep learning models to forecast volatility, I found [this]([/Users/beneverman/Documents/Coding/QuantHive/IDVF-Oxford-v1/IDVF_Oxford.pdf](https://academic.oup.com/jfec/advance-article/doi/10.1093/jjfinec/nbad005/7081291)) paper by a group of researchers as Oxford. The paper was fascinating, as the researchers discovered commonality between securities in their intraday volatility patterns. They leveraged this commonality to train forecasting models on a subset of securities. 
 
 Academic research serves to introduce novel ideas and methodologies, typical in the absence of a specific application or use. My interest in forecasting volatility is driven by the fact that, in theory, one who can accurately forecast volatility can leverage options strategies to generate significant returns.
 
